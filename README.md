@@ -79,6 +79,7 @@ services:
     ports:
       - "8000:8000"
     environment:
+      # Overrides the default port (8000) if needed
       - PORT=8000
     restart: unless-stopped
 ```
