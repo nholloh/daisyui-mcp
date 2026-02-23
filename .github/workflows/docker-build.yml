@@ -49,6 +49,7 @@ jobs:
       - name: Build and push Docker image
         uses: docker/build-push-action@v5
         with:
+          file: Containerfile
           context: .
           push: ${{ inputs.push }}
           tags: ${{ steps.meta.outputs.tags }}
