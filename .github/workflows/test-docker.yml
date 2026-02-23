@@ -63,6 +63,7 @@ jobs:
 
       - name: Delete ephemeral package version
         if: always()
+        continue-on-error: true
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
