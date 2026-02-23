@@ -73,26 +73,16 @@ jobs:
 
           echo "Identifying package version for tag: $TAG"
 
-          # Fetch all versions and filter for the specific tag
+          # Fetch versions and filter for the specific tag
           # Note: Using /users/ endpoint. If this fails for orgs, /orgs/ might be needed.
           # We'll try to determine the type or just try /users/ first.
 
-          ALL_VERSIONS=$(gh api "/users/$OWNER/packages/container/$PACKAGE_NAME/versions" --jq '.[] | select(.metadata.container.tags[] | select(. == "$TAG")) | .id')
+          VERSION_ID=$(gh api "/users/$OWNER/packages/container/$PACKAGE_NAME/versions" --jq ".[] | select(.metadata.container.tags[] | select(. == \"$TAG\")) | .id")
 
-          # Count how many versions have this tag
-          VERSION_COUNT=$(echo "$ALL_VERSIONS" | grep -c .)
-
-          if [ "$VERSION_COUNT" -eq 0 ]; then
-            echo "No package version found with tag $TAG. It might have been already deleted or never created."
-          elif [ "$VERSION_COUNT" -eq 1 ]; then
-            # This is the last tagged version, delete the entire package
-            echo "Found 1 version with tag $TAG. This is the last tagged version. Deleting the entire package..."
-            gh api -X DELETE "/users/$OWNER/packages/container/$PACKAGE_NAME"
-            echo "Package deleted."
-          else
-            # There are other versions with this tag, delete just this version
-            VERSION_ID=$(echo "$ALL_VERSIONS" | head -1)
-            echo "Found $VERSION_COUNT versions with tag $TAG. Deleting version $VERSION_ID..."
+          if [ -n "$VERSION_ID" ]; then
+            echo "Found version ID: $VERSION_ID. Deleting..."
             gh api -X DELETE "/users/$OWNER/packages/container/$PACKAGE_NAME/versions/$VERSION_ID"
             echo "Package version deleted."
+          else
+            echo "No package version found with tag $TAG. It might have been already deleted or never created."
           fi
